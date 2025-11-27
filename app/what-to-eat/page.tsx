@@ -266,17 +266,17 @@ export default function WhatToEatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-pink-50/30 to-rose-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3 hover:text-blue-600 transition-colors cursor-pointer">
-              <Sparkles className="text-blue-500" />
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 via-pink-500 to-rose-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
+              <Sparkles className="text-pink-500 animate-pulse" />
               What's Near Me?
-            </h1>
+          </h1>
           </Link>
-          <p className="text-lg text-gray-600">
-            Discover restaurants near you and let us help you decide what to eat today!
+          <p className="text-lg text-orange-800/80 font-medium">
+            🍽️ Discover restaurants near you and let us help you decide what to eat today!
           </p>
         </div>
 
@@ -284,11 +284,11 @@ export default function WhatToEatPage() {
         <Dialog open={distanceDialogOpen} onOpenChange={setDistanceDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <MapPin className="text-blue-500" />
+              <DialogTitle className="flex items-center gap-2 text-orange-900">
+                <MapPin className="text-orange-500" />
                 Step 1: Set Search Distance
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-orange-700/80">
                 Enter the distance range you want to search (in kilometers)
               </DialogDescription>
             </DialogHeader>
@@ -312,7 +312,7 @@ export default function WhatToEatPage() {
               <Button
                 onClick={handleDistanceSubmit}
                 disabled={!distance}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Next: Choose Restaurant Type
               </Button>
@@ -324,11 +324,11 @@ export default function WhatToEatPage() {
         <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Utensils className="text-blue-500" />
+              <DialogTitle className="flex items-center gap-2 text-orange-900">
+                <Utensils className="text-orange-500" />
                 Step 2: Choose Restaurant Type
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-orange-700/80">
                 Select the type of cuisine you want to eat
               </DialogDescription>
             </DialogHeader>
@@ -340,7 +340,10 @@ export default function WhatToEatPage() {
                 <SelectContent>
                   {foodTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
-                      {type.label}
+                      <span className="flex items-center gap-2">
+                        <span>{type.icon}</span>
+                        <span>{type.label}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -353,16 +356,23 @@ export default function WhatToEatPage() {
                   setDistanceDialogOpen(true)
                 }}
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400"
               >
                 Back
               </Button>
               <Button
                 onClick={handleTypeSelect}
                 disabled={loading}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                {loading ? 'Searching...' : 'Search Restaurants'}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  'Search Restaurants'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -370,9 +380,9 @@ export default function WhatToEatPage() {
 
         {/* Error Message */}
         {error && (
-          <Card className="mb-6 border-red-200 bg-red-50">
+          <Card className="mb-6 border-red-200 bg-red-50/80 backdrop-blur-sm">
             <CardContent className="pt-6">
-              <p className="text-red-600">{error}</p>
+              <p className="text-red-600 font-medium">{error}</p>
             </CardContent>
           </Card>
         )}
@@ -381,15 +391,15 @@ export default function WhatToEatPage() {
         {step === 'browse' && (
           <div className="space-y-6">
             {/* Filters and Sort */}
-            <Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-2 border-orange-100 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-orange-900">
                   Filter & Sort
                   {loading && (
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
                   )}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2">
+                <CardDescription className="flex items-center gap-2 text-orange-700/80">
                   {loading ? (
                     <>
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -459,7 +469,7 @@ export default function WhatToEatPage() {
                 <div className="mt-4 flex gap-2">
                   <Button
                     onClick={handleRandomSelect}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600"
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     size="lg"
                     disabled={loading || filteredRestaurants.length === 0}
                   >
@@ -471,6 +481,7 @@ export default function WhatToEatPage() {
                     variant="outline"
                     size="lg"
                     disabled={loading}
+                    className="border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400"
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     New Search
@@ -484,8 +495,8 @@ export default function WhatToEatPage() {
               {loading && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
                   <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <span className="text-sm text-gray-600">Loading restaurants...</span>
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                    <span className="text-sm text-orange-700/80">Loading restaurants...</span>
                   </div>
                 </div>
               )}
@@ -493,7 +504,7 @@ export default function WhatToEatPage() {
                 {filteredRestaurants.map((restaurant) => (
                   <Card
                     key={restaurant.id}
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    className="cursor-pointer hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-2 border-orange-100 hover:border-orange-300 hover:scale-105"
                     onClick={() => {
                       if (!loading) {
                         setSelectedRestaurant(restaurant)
@@ -502,9 +513,9 @@ export default function WhatToEatPage() {
                     }}
                   >
                     <CardHeader>
-                      <CardTitle className="text-lg">{restaurant.name}</CardTitle>
-                      <CardDescription className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3" />
+                      <CardTitle className="text-lg text-orange-900">{restaurant.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 text-orange-700/80">
+                        <MapPin className="h-3 w-3 text-orange-500" />
                         {formatDistance(restaurant.distance)} away
                       </CardDescription>
                     </CardHeader>
@@ -513,16 +524,16 @@ export default function WhatToEatPage() {
                         {restaurant.rating && (
                           <div className="flex items-center gap-1">
                             <Star className="text-yellow-500 fill-yellow-500 h-4 w-4" />
-                            <span className="text-sm font-medium">{restaurant.rating}</span>
+                            <span className="text-sm font-medium text-orange-900">{restaurant.rating}</span>
                           </div>
                         )}
                         {restaurant.cuisine && (
-                          <Badge variant="secondary" className="text-xs flex items-center gap-1.5 w-fit">
+                          <Badge variant="secondary" className="text-xs flex items-center gap-1.5 w-fit bg-orange-100 text-orange-800 border-orange-200">
                             <span>{getCuisineIcon(restaurant.cuisine)}</span>
                             <span>{restaurant.cuisine}</span>
                           </Badge>
                         )}
-                        <p className="text-sm text-gray-600 line-clamp-2">{restaurant.vicinity}</p>
+                        <p className="text-sm text-orange-700/70 line-clamp-2">{restaurant.vicinity}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -534,19 +545,19 @@ export default function WhatToEatPage() {
 
         {/* Result Display */}
         {step === 'result' && selectedRestaurant && (
-          <Card className="border-2 border-blue-200 shadow-lg">
+          <Card className="border-2 border-orange-200 shadow-xl bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl mb-2">🎉 Your Random Pick!</CardTitle>
-              <CardDescription className="text-lg">
+              <CardTitle className="text-3xl mb-2 bg-gradient-to-r from-orange-600 via-pink-500 to-rose-600 bg-clip-text text-transparent">🎉 Your Random Pick!</CardTitle>
+              <CardDescription className="text-lg text-orange-700/80">
                 Found {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} matching your criteria
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-orange-900 mb-2">
                   {selectedRestaurant.name}
                 </h2>
-                <div className="flex items-center justify-center gap-4 text-gray-600 mb-4 flex-wrap">
+                <div className="flex items-center justify-center gap-4 text-orange-700/80 mb-4 flex-wrap">
                   {selectedRestaurant.rating && (
                     <div className="flex items-center gap-1">
                       <Star className="text-yellow-500 fill-yellow-500" size={18} />
@@ -554,34 +565,34 @@ export default function WhatToEatPage() {
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    <MapPin size={18} className="text-blue-500" />
+                    <MapPin size={18} className="text-orange-500" />
                     <span>{formatDistance(selectedRestaurant.distance)} away</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-gray-700 mb-4">
-                  <MapPin size={18} className="text-blue-500" />
+                <div className="flex items-center justify-center gap-2 text-orange-700/80 mb-4">
+                  <MapPin size={18} className="text-orange-500" />
                   <span>{selectedRestaurant.vicinity}</span>
                 </div>
                 {selectedRestaurant.cuisine && (
-                  <Badge variant="secondary" className="mb-2 flex items-center gap-1.5 w-fit mx-auto">
+                  <Badge variant="secondary" className="mb-2 flex items-center gap-1.5 w-fit mx-auto bg-orange-100 text-orange-800 border-orange-200">
                     <span className="text-base">{getCuisineIcon(selectedRestaurant.cuisine)}</span>
                     <span>{selectedRestaurant.cuisine}</span>
                   </Badge>
                 )}
                 {selectedRestaurant.phone && (
-                  <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
-                    <Phone size={16} />
+                  <div className="flex items-center justify-center gap-2 text-orange-700/80 mb-2">
+                    <Phone size={16} className="text-orange-500" />
                     <span className="text-sm">{selectedRestaurant.phone}</span>
                   </div>
                 )}
                 {selectedRestaurant.website && (
-                  <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
-                    <Globe size={16} />
+                  <div className="flex items-center justify-center gap-2 text-orange-700/80 mb-4">
+                    <Globe size={16} className="text-orange-500" />
                     <a
                       href={selectedRestaurant.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-orange-600 hover:text-orange-700 hover:underline font-medium"
                     >
                       Visit Website
                     </a>
@@ -589,14 +600,19 @@ export default function WhatToEatPage() {
                 )}
               </div>
               <div className="flex gap-3 justify-center pt-4 flex-wrap">
-                <Button onClick={() => setStep('browse')} variant="outline" size="lg">
+                <Button 
+                  onClick={() => setStep('browse')} 
+                  variant="outline" 
+                  size="lg"
+                  className="border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400"
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to List
                 </Button>
                 <Button
                   onClick={handleRandomSelect}
                   size="lg"
-                  className="bg-blue-500 hover:bg-blue-600"
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <Shuffle className="mr-2 h-4 w-4" />
                   Pick Another
@@ -609,7 +625,7 @@ export default function WhatToEatPage() {
                     )
                   }}
                   size="lg"
-                  variant="default"
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <Navigation className="mr-2 h-4 w-4" />
                   View on Map
@@ -621,11 +637,11 @@ export default function WhatToEatPage() {
 
         {/* Loading State */}
         {loading && (
-          <Card className="mt-6">
+          <Card className="mt-6 bg-white/80 backdrop-blur-sm border-2 border-orange-100">
             <CardContent className="pt-6 text-center">
               <div className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                <span>Searching for restaurants...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                <span className="text-orange-700/80">Searching for restaurants...</span>
               </div>
             </CardContent>
           </Card>
