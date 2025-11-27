@@ -1,10 +1,16 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Inter, Poppins } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"], variable: '--font-geist' });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: '--font-geist-mono' });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+const poppins = Poppins({ 
+  subsets: ["latin"], 
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-poppins' 
+});
 
 export const metadata: Metadata = {
   title: "What's Near Me - UBC Student App",
@@ -17,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="zh-CN">
-      <body className={`font-sans antialiased`}>
+    <html lang="en">
+      <body className={`${inter.variable} ${poppins.variable} ${geist.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
