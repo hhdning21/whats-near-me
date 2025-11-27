@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Utensils, Star, Users, Sparkles, Shuffle, ArrowLeft, Navigation, Phone, Globe } from 'lucide-react'
+import Link from 'next/link'
 
 interface Place {
   id: string
@@ -220,10 +221,12 @@ export default function WhatToEatPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <Sparkles className="text-blue-500" />
-            What's Near Me?
-          </h1>
+          <Link href="/" className="inline-block">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3 hover:text-blue-600 transition-colors cursor-pointer">
+              <Sparkles className="text-blue-500" />
+              What's Near Me?
+            </h1>
+          </Link>
           <p className="text-lg text-gray-600">
             Discover restaurants near you and let us help you decide what to eat today!
           </p>
