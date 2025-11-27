@@ -2,6 +2,25 @@
 
 A ready-to-use boilerplate for hackathon projects using Next.js (Node.js framework) and Tailwind CSS.
 
+## 🍽️ 今天吃什么小程序
+
+这个项目包含一个"今天吃什么"小程序，使用 Google Maps API 帮助您找到附近的餐厅。
+
+### 功能特点
+
+- 📍 **距离筛选**：输入距离范围，搜索附近的餐厅
+- 🍜 **食物类型筛选**：选择您想吃的食物类型
+- 🎲 **随机推荐**：从符合条件的餐厅中随机选择一个
+- 🗺️ **地图导航**：一键打开 Google Maps 查看餐厅位置
+
+### 使用步骤
+
+1. 访问 `/what-to-eat` 页面
+2. 允许浏览器获取您的位置
+3. 输入搜索距离（单位：公里）
+4. 选择食物类型
+5. 查看推荐的餐厅！
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -9,6 +28,7 @@ A ready-to-use boilerplate for hackathon projects using Next.js (Node.js framewo
 - **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
 - **npm** or **yarn** (comes with Node.js)
 - A code editor (we recommend [VS Code](https://code.visualstudio.com/))
+- **Google Maps API Key** - 用于"今天吃什么"功能
 
 ### Installation
 
@@ -25,16 +45,33 @@ A ready-to-use boilerplate for hackathon projects using Next.js (Node.js framewo
    yarn install
    ```
 
-3. **Run the development server**
+3. **配置 Google Maps API Key**
+   
+   创建 `.env.local` 文件（在项目根目录）：
+   ```bash
+   GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+   ```
+   
+   **获取 API Key 的步骤：**
+   1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
+   2. 创建新项目或选择现有项目
+   3. 启用以下 API：
+      - Places API
+      - Geocoding API
+   4. 创建凭据（API Key）
+   5. 将 API Key 复制到 `.env.local` 文件中
+
+4. **Run the development server**
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see your app!
+   Navigate to [http://localhost:3000/what-to-eat](http://localhost:3000/what-to-eat) for the "What to Eat" app!
 
 ## 📁 Project Structure
 
@@ -222,15 +259,27 @@ Access at: `http://localhost:3000/api/hello`
 Create a `.env.local` file:
 
 ```
+# Google Maps API Key (必需 - 用于"今天吃什么"功能)
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# 其他环境变量
 NEXT_PUBLIC_API_KEY=your_api_key_here
 DATABASE_URL=your_database_url
 ```
 
+**重要提示：**
+- `.env.local` 文件不会被提交到 Git（已在 `.gitignore` 中）
+- 服务器端变量（如 `GOOGLE_MAPS_API_KEY`）不需要 `NEXT_PUBLIC_` 前缀
+- 客户端可访问的变量需要 `NEXT_PUBLIC_` 前缀
+
 Use in your code:
 
 ```tsx
-const apiKey = process.env.NEXT_PUBLIC_API_KEY // Client-side
-const dbUrl = process.env.DATABASE_URL // Server-side only
+// 服务器端（API 路由）
+const apiKey = process.env.GOOGLE_MAPS_API_KEY
+
+// 客户端（需要 NEXT_PUBLIC_ 前缀）
+const publicKey = process.env.NEXT_PUBLIC_API_KEY
 ```
 
 ## 📦 Useful Packages
