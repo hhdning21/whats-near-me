@@ -3,18 +3,34 @@ import type { NextRequest } from 'next/server'
 // Restaurant category mappings for OpenStreetMap
 const categoryKeywords: Record<string, string[]> = {
   all: ['restaurant', 'cafe', 'fast_food', 'food_court'],
-  chinese: ['chinese', 'restaurant'],
-  japanese: ['japanese', 'sushi', 'restaurant'],
-  korean: ['korean', 'restaurant'],
-  italian: ['italian', 'pizza', 'restaurant'],
-  mexican: ['mexican', 'restaurant'],
-  thai: ['thai', 'restaurant'],
-  indian: ['indian', 'restaurant'],
-  american: ['american', 'burger', 'restaurant'],
-  fast_food: ['fast_food', 'burger', 'pizza'],
+  chinese: ['chinese'],
+  japanese: ['japanese', 'sushi'],
+  korean: ['korean'],
+  italian: ['italian', 'pizza'],
+  mexican: ['mexican'],
+  thai: ['thai'],
+  indian: ['indian'],
+  american: ['american', 'burger'],
+  fast_food: ['fast_food', 'burger'],
   cafe: ['cafe', 'coffee_shop'],
   dessert: ['ice_cream', 'dessert', 'bakery'],
-  vegetarian: ['vegetarian', 'vegan', 'restaurant'],
+  vegetarian: ['vegetarian', 'vegan'],
+}
+
+// Primary keywords that must match for strict filtering
+const primaryKeywords: Record<string, string[]> = {
+  chinese: ['chinese'],
+  japanese: ['japanese', 'sushi'],
+  korean: ['korean'],
+  italian: ['italian'],
+  mexican: ['mexican'],
+  thai: ['thai'],
+  indian: ['indian'],
+  american: ['american'],
+  fast_food: ['fast_food'],
+  cafe: ['cafe', 'coffee_shop'],
+  dessert: ['dessert', 'ice_cream', 'bakery'],
+  vegetarian: ['vegetarian', 'vegan'],
 }
 
 export async function GET(request: NextRequest) {
@@ -66,18 +82,34 @@ export async function GET(request: NextRequest) {
       .filter((element: any) => {
         if (!element.tags?.name) return false
         
-        // Filter by category if not 'all'
-        if (type !== 'all' && keywords.length > 0) {
+        // Filter by category if not 'all' - strict matching
+        if (type !== 'all') {
           const amenity = (element.tags.amenity || '').toLowerCase()
           const cuisine = (element.tags.cuisine || '').toLowerCase()
           const name = (element.tags.name || '').toLowerCase()
           
-          const matchesCategory = keywords.some(keyword => 
-            amenity.includes(keyword) || 
-            cuisine.includes(keyword) || 
-            name.includes(keyword)
-          )
+          // Get primary keywords for this category
+          const primaryKeys = primaryKeywords[type] || []
           
+          // Strict matching: must match at least one primary keyword
+          // Priority: cuisine > amenity > name (for specific keywords only)
+          const matchesCategory = primaryKeys.some(keyword => {
+            // First priority: cuisine tag (most reliable)
+            if (cuisine && cuisine.includes(keyword)) {
+              return true
+            }
+            // Second priority: amenity tag
+            if (amenity && amenity.includes(keyword)) {
+              return true
+            }
+            // Third priority: name (only for specific cuisine keywords, not generic terms)
+            if (keyword !== 'restaurant' && keyword !== 'cafe' && name.includes(keyword)) {
+              return true
+            }
+            return false
+          })
+          
+          // If no match found, exclude this restaurant
           if (!matchesCategory) return false
         }
         
@@ -125,11 +157,11 @@ export async function GET(request: NextRequest) {
 
     // Sort results
     if (sortBy === 'distance') {
-      places.sort((a, b) => a.distance - b.distance)
+      places.sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0))
     } else if (sortBy === 'rating') {
-      places.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      places.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
     } else if (sortBy === 'name') {
-      places.sort((a, b) => a.name.localeCompare(b.name))
+      places.sort((a: any, b: any) => a.name.localeCompare(b.name))
     }
 
     return Response.json({ places, total: places.length })
