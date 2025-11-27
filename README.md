@@ -1,41 +1,36 @@
-# Hackathon Boilerplate - Next.js + Tailwind CSS
+# What's Near Me - UBC Student App
 
-A ready-to-use boilerplate for hackathon projects using Next.js (Node.js framework) and Tailwind CSS.
+A location-based app built for UBC students to discover restaurants, study spots, and campus resources. Built with Next.js, OpenStreetMap, and Tailwind CSS.
 
-## 🍽️ 今天吃什么小程序
+## 🍽️ Features
 
-这个项目包含一个"今天吃什么"小程序，使用 Google Maps API 帮助您找到附近的餐厅。
+### Restaurant Discovery
+- **Location-Based Search**: Find restaurants near you using OpenStreetMap API
+- **Category Filtering**: Filter by cuisine type (Chinese, Japanese, Italian, Mexican, Thai, Indian, American, Fast Food, Cafe, Dessert, Vegetarian)
+- **Smart Sorting**: Sort restaurants by distance, rating, or name
+- **Random Selection**: Can't decide? Let the app randomly pick a restaurant for you!
+- **Distance Calculation**: See exactly how far each restaurant is from your location
 
-### 功能特点
-
-- 📍 **距离筛选**：输入距离范围，搜索附近的餐厅
-- 🍜 **食物类型筛选**：选择您想吃的食物类型
-- 🎲 **随机推荐**：从符合条件的餐厅中随机选择一个
-- 🗺️ **地图导航**：一键打开 Google Maps 查看餐厅位置
-
-### 使用步骤
-
-1. 访问 `/what-to-eat` 页面
-2. 允许浏览器获取您的位置
-3. 输入搜索距离（单位：公里）
-4. 选择食物类型
-5. 查看推荐的餐厅！
+### UBC Student Wellbeing
+- **Study Spots**: Discover the best study locations on campus (libraries, cafes, outdoor spaces)
+- **Campus Events**: Stay connected with academic, social, wellness, and career events
+- **Wellness Tips**: Access resources and tips for maintaining academic success and personal wellbeing
+- **Quick Navigation**: Get directions to study spots and events
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
-- **npm** or **yarn** (comes with Node.js)
+- **npm**, **yarn**, or **pnpm** (comes with Node.js)
 - A code editor (we recommend [VS Code](https://code.visualstudio.com/))
-- **Google Maps API Key** - 用于"今天吃什么"功能
 
 ### Installation
 
 1. **Clone or download this repository**
    ```bash
    git clone <your-repo-url>
-   cd hackathon-boilerplate
+   cd whats-near-me
    ```
 
 2. **Install dependencies**
@@ -43,91 +38,76 @@ A ready-to-use boilerplate for hackathon projects using Next.js (Node.js framewo
    npm install
    # or
    yarn install
+   # or
+   pnpm install
    ```
 
-3. **配置 Google Maps API Key**
-   
-   创建 `.env.local` 文件（在项目根目录）：
-   ```bash
-   GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-   ```
-   
-   **获取 API Key 的步骤：**
-   1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
-   2. 创建新项目或选择现有项目
-   3. 启用以下 API：
-      - Places API
-      - Geocoding API
-   4. 创建凭据（API Key）
-   5. 将 API Key 复制到 `.env.local` 文件中
-
-4. **Run the development server**
+3. **Run the development server**
    ```bash
    npm run dev
    # or
    yarn dev
+   # or
+   pnpm dev
    ```
 
-5. **Open your browser**
+4. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see your app!
-   Navigate to [http://localhost:3000/what-to-eat](http://localhost:3000/what-to-eat) for the "What to Eat" app!
 
 ## 📁 Project Structure
 
 ```
-hackathon-boilerplate/
+whats-near-me/
 ├── app/                    # Application pages and routes
 │   ├── page.tsx           # Home page (/)
-│   ├── about/             # About page (/about)
+│   ├── what-to-eat/       # Restaurant discovery page
+│   ├── ubc-wellbeing/     # UBC student resources page
 │   ├── layout.tsx         # Root layout (wraps all pages)
+│   ├── api/               # API routes
+│   │   └── places/        # OpenStreetMap restaurant search API
 │   └── globals.css        # Global styles + Tailwind config
 ├── components/            # Reusable React components
-│   ├── ui/               # UI components (buttons, cards, etc.)
-│   └── navbar.tsx        # Example navigation component
+│   └── ui/               # UI components (buttons, cards, etc.)
 ├── lib/                   # Utility functions and helpers
 │   └── utils.ts          # Helper functions
 ├── public/               # Static files (images, fonts, etc.)
 └── README.md             # This file!
 ```
 
-## 🎨 Using Tailwind CSS
+## 🗺️ How It Works
 
-Tailwind CSS is a utility-first CSS framework. Instead of writing custom CSS, you use pre-built classes.
+### Restaurant Search
 
-### Basic Examples
+1. **Allow Location Access**: The app requests your location to find nearby restaurants
+2. **Set Search Radius**: Choose how far you want to search (in kilometers)
+3. **Filter & Sort**: 
+   - Filter by cuisine category
+   - Sort by distance (nearest first), rating (highest first), or name (A-Z)
+4. **Browse or Random Pick**: 
+   - Browse through all results
+   - Use the random picker to let the app decide for you!
 
-```tsx
-// Button with Tailwind classes
-<button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-  Click Me
-</button>
+### OpenStreetMap Integration
 
-// Card layout
-<div className="bg-white shadow-lg rounded-lg p-6">
-  <h2 className="text-2xl font-bold mb-4">Card Title</h2>
-  <p className="text-gray-600">Card content goes here</p>
-</div>
+The app uses the **Overpass API** (OpenStreetMap's query language) to search for restaurants. This means:
+- ✅ No API keys required
+- ✅ Free and open-source
+- ✅ Community-maintained data
+- ✅ Privacy-friendly
 
-// Responsive grid
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  {/* Items will be 1 column on mobile, 2 on tablet, 3 on desktop */}
-</div>
-```
+## 🎨 Tech Stack
 
-### Common Tailwind Classes
-
-- **Spacing**: `p-4` (padding), `m-4` (margin), `gap-4` (gap)
-- **Colors**: `bg-blue-500`, `text-red-600`, `border-gray-300`
-- **Typography**: `text-xl`, `font-bold`, `text-center`
-- **Layout**: `flex`, `grid`, `items-center`, `justify-between`
-- **Responsive**: `md:text-lg`, `lg:grid-cols-3` (prefix with breakpoint)
-
-[Full Tailwind Documentation](https://tailwindcss.com/docs)
+- **Next.js 16** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **OpenStreetMap/Overpass API** - Location and restaurant data
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Beautiful icon library
 
 ## 🛠️ Building Your Web App
 
-### 1. Creating New Pages
+### Creating New Pages
 
 Create a new folder in the `app/` directory:
 
@@ -145,33 +125,7 @@ export default function ProjectsPage() {
 
 This automatically creates a route at `/projects`
 
-### 2. Creating Components
-
-Create reusable components in the `components/` folder:
-
-```tsx
-// components/project-card.tsx
-export function ProjectCard({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-xl font-bold">{title}</h3>
-      <p className="text-gray-600 mt-2">{description}</p>
-    </div>
-  )
-}
-```
-
-Use it in your pages:
-
-```tsx
-import { ProjectCard } from '@/components/project-card'
-
-export default function Page() {
-  return <ProjectCard title="My Project" description="Description here" />
-}
-```
-
-### 3. Adding Interactivity
+### Adding Interactivity
 
 Use React hooks for interactive features:
 
@@ -197,37 +151,7 @@ export default function Counter() {
 }
 ```
 
-### 4. Fetching Data
-
-Fetch data from APIs:
-
-```tsx
-// Server Component (default)
-export default async function DataPage() {
-  const res = await fetch('https://api.example.com/data')
-  const data = await res.json()
-  
-  return <div>{/* Display your data */}</div>
-}
-
-// Client Component
-'use client'
-import { useEffect, useState } from 'react'
-
-export default function ClientDataPage() {
-  const [data, setData] = useState(null)
-  
-  useEffect(() => {
-    fetch('https://api.example.com/data')
-      .then(res => res.json())
-      .then(setData)
-  }, [])
-  
-  return <div>{/* Display your data */}</div>
-}
-```
-
-### 5. Adding API Routes
+### Adding API Routes
 
 Create API endpoints in `app/api/`:
 
@@ -236,69 +160,29 @@ Create API endpoints in `app/api/`:
 export async function GET() {
   return Response.json({ message: 'Hello from API!' })
 }
-
-export async function POST(request: Request) {
-  const body = await request.json()
-  // Process the data
-  return Response.json({ success: true })
-}
 ```
 
 Access at: `http://localhost:3000/api/hello`
 
-## 🎯 Hackathon Tips
+## 🎯 Features for UBC Students
 
-1. **Start Simple**: Get a basic version working first, then add features
-2. **Use Components**: Break your UI into reusable components
-3. **Mobile First**: Design for mobile, then enhance for desktop
-4. **Git Commits**: Commit often with clear messages
-5. **Environment Variables**: Use `.env.local` for API keys (never commit this file!)
+### Study Spots
+- Irving K. Barber Learning Centre
+- Koerner Library
+- Campus cafes and outdoor spaces
+- Study rooms and group spaces
 
-## Adding Environment Variables
+### Campus Events
+- Wellness Wednesday sessions
+- Study group meetups
+- Career fairs
+- Social mixers
 
-Create a `.env.local` file:
-
-```
-# Google Maps API Key (必需 - 用于"今天吃什么"功能)
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-
-# 其他环境变量
-NEXT_PUBLIC_API_KEY=your_api_key_here
-DATABASE_URL=your_database_url
-```
-
-**重要提示：**
-- `.env.local` 文件不会被提交到 Git（已在 `.gitignore` 中）
-- 服务器端变量（如 `GOOGLE_MAPS_API_KEY`）不需要 `NEXT_PUBLIC_` 前缀
-- 客户端可访问的变量需要 `NEXT_PUBLIC_` 前缀
-
-Use in your code:
-
-```tsx
-// 服务器端（API 路由）
-const apiKey = process.env.GOOGLE_MAPS_API_KEY
-
-// 客户端（需要 NEXT_PUBLIC_ 前缀）
-const publicKey = process.env.NEXT_PUBLIC_API_KEY
-```
-
-## 📦 Useful Packages
-
-Install additional packages as needed:
-
-```bash
-### Icons
-npm install lucide-react
-
-### Forms
-npm install react-hook-form
-
-### HTTP requests
-npm install axios
-
-### Date handling
-npm install date-fns
-```
+### Wellness Resources
+- Study break strategies
+- Time management tips
+- Social connection resources
+- Physical wellness guidance
 
 ## 🚢 Deployment
 
@@ -316,36 +200,46 @@ Your app will be live in minutes!
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [React Documentation](https://react.dev)
-- [MDN Web Docs](https://developer.mozilla.org/)
+- [OpenStreetMap Wiki](https://wiki.openstreetmap.org/)
+- [Overpass API Documentation](https://wiki.openstreetmap.org/wiki/Overpass_API)
 
 ## 🆘 Common Issues
 
 **Port already in use?**
 ```bash
-### Kill the process on port 3000
+# Kill the process on port 3000
 npx kill-port 3000
 ```
 
 **Styles not updating?**
 ```bash
-### Clear Next.js cache
+# Clear Next.js cache
 rm -rf .next
 npm run dev
 ```
 
 **Module not found?**
 ```bash
-### Reinstall dependencies
+# Reinstall dependencies
 rm -rf node_modules
 npm install
 ```
 
-## 🎉 Good Luck!
+## 🎉 Features Overview
 
-You're all set! Start building your amazing hackathon project. Remember:
-- **Build fast, iterate faster**
-- **Focus on core features first**
-- **Don't be afraid to ask for help**
-- **Have fun!**
+- ✅ **No API Keys Required** - Uses free OpenStreetMap data
+- ✅ **Privacy-Friendly** - Location data stays on your device
+- ✅ **Mobile Responsive** - Works great on all devices
+- ✅ **Fast & Lightweight** - Optimized for performance
+- ✅ **UBC-Focused** - Built specifically for UBC students
+- ✅ **Wellbeing Support** - Resources for student success
 
-Happy hacking! 🚀
+## 🤝 Contributing
+
+Feel free to submit issues, fork the repository, and create pull requests for any improvements!
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+Happy exploring! 🚀

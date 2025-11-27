@@ -19,13 +19,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { MapPin, Utensils, Star, Users, Sparkles } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { MapPin, Utensils, Star, Users, Sparkles, Shuffle, ArrowLeft, Navigation, Phone, Globe } from 'lucide-react'
 
 interface Place {
   id: string
   name: string
-  rating: number
-  userRatingsTotal: number
+  rating: number | null
+  userRatingsTotal: number | null
   vicinity: string
   geometry: {
     location: {
@@ -34,14 +35,18 @@ interface Place {
     }
   }
   types: string[]
-  priceLevel?: number
-  photos?: string
+  cuisine?: string | null
+  amenity?: string | null
+  distance?: number
+  website?: string | null
+  phone?: string | null
 }
 
 export default function WhatToEatPage() {
-  const [step, setStep] = useState<'distance' | 'type' | 'result'>('distance')
-  const [distance, setDistance] = useState<string>('')
+  const [step, setStep] = useState<'distance' | 'browse' | 'result'>('distance')
+  const [distance, setDistance] = useState<string>('2')
   const [foodType, setFoodType] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('distance')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [restaurants, setRestaurants] = useState<Place[]>([])
   const [filteredRestaurants, setFilteredRestaurants] = useState<Place[]>([])
@@ -49,9 +54,8 @@ export default function WhatToEatPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [distanceDialogOpen, setDistanceDialogOpen] = useState(true)
-  const [typeDialogOpen, setTypeDialogOpen] = useState(false)
 
-  // 获取用户位置
+  // Get user location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -62,42 +66,41 @@ export default function WhatToEatPage() {
           })
         },
         (err) => {
-          setError('无法获取您的位置，请确保已允许位置访问权限')
-          console.error('位置获取错误:', err)
+          setError('Unable to get your location. Please ensure location permissions are enabled.')
+          console.error('Location error:', err)
         }
       )
     } else {
-      setError('您的浏览器不支持地理位置功能')
+      setError('Your browser does not support geolocation')
     }
   }, [])
 
-  // 食物类型选项
+  // Food type options
   const foodTypes = [
-    { value: 'all', label: '全部类型' },
-    { value: '中餐', label: '中餐' },
-    { value: '日料', label: '日料' },
-    { value: '韩式', label: '韩式料理' },
-    { value: '西餐', label: '西餐' },
-    { value: '意大利', label: '意大利菜' },
-    { value: '墨西哥', label: '墨西哥菜' },
-    { value: '泰国', label: '泰国菜' },
-    { value: '印度', label: '印度菜' },
-    { value: '火锅', label: '火锅' },
-    { value: '烧烤', label: '烧烤' },
-    { value: '快餐', label: '快餐' },
-    { value: '咖啡', label: '咖啡厅' },
-    { value: '甜品', label: '甜品店' },
+    { value: 'all', label: 'All Types' },
+    { value: 'chinese', label: 'Chinese' },
+    { value: 'japanese', label: 'Japanese' },
+    { value: 'korean', label: 'Korean' },
+    { value: 'italian', label: 'Italian' },
+    { value: 'mexican', label: 'Mexican' },
+    { value: 'thai', label: 'Thai' },
+    { value: 'indian', label: 'Indian' },
+    { value: 'american', label: 'American' },
+    { value: 'fast_food', label: 'Fast Food' },
+    { value: 'cafe', label: 'Cafe' },
+    { value: 'dessert', label: 'Dessert' },
+    { value: 'vegetarian', label: 'Vegetarian' },
   ]
 
-  // 处理距离输入
+  // Handle distance input and search
   const handleDistanceSubmit = async () => {
     if (!distance || isNaN(Number(distance)) || Number(distance) <= 0) {
-      setError('请输入有效的距离（单位：公里）')
+      setError('Please enter a valid distance (in kilometers)')
       return
     }
 
     if (!userLocation) {
-      setError('无法获取您的位置')
+      setError('Unable to get your location')
       return
     }
 
@@ -106,16 +109,14 @@ export default function WhatToEatPage() {
     setDistanceDialogOpen(false)
 
     try {
-      // 将公里转换为米
       const radiusInMeters = Number(distance) * 1000
-
       const response = await fetch(
-        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=all`
+        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=${foodType}&sortBy=${sortBy}`
       )
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || '获取餐厅失败')
+        throw new Error(errorData.error || 'Failed to fetch restaurants')
       }
 
       const data = await response.json()
@@ -123,15 +124,14 @@ export default function WhatToEatPage() {
       setFilteredRestaurants(data.places || [])
 
       if (data.places.length === 0) {
-        setError('在指定距离内没有找到餐厅，请尝试增加距离')
+        setError('No restaurants found within the specified distance. Try increasing the distance.')
         setStep('distance')
         setDistanceDialogOpen(true)
       } else {
-        setStep('type')
-        setTypeDialogOpen(true)
+        setStep('browse')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取餐厅时出错')
+      setError(err instanceof Error ? err.message : 'Error fetching restaurants')
       setStep('distance')
       setDistanceDialogOpen(true)
     } finally {
@@ -139,66 +139,54 @@ export default function WhatToEatPage() {
     }
   }
 
-  // 处理食物类型选择
-  const handleTypeSelect = async () => {
-    if (!userLocation || !distance) {
-      return
-    }
+  // Handle filter and sort changes
+  const handleFilterChange = async () => {
+    if (!userLocation || !distance) return
 
     setLoading(true)
     setError(null)
-    setTypeDialogOpen(false)
 
     try {
       const radiusInMeters = Number(distance) * 1000
       const response = await fetch(
-        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=${foodType}`
+        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=${foodType}&sortBy=${sortBy}`
       )
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || '筛选餐厅失败')
+        throw new Error(errorData.error || 'Failed to filter restaurants')
       }
 
       const data = await response.json()
-      let filtered = data.places || []
+      setFilteredRestaurants(data.places || [])
 
-      // 如果选择了特定类型但没有结果，尝试使用关键词匹配
-      if (filtered.length === 0 && foodType !== 'all') {
-        filtered = restaurants.filter((restaurant) => {
-          const nameLower = restaurant.name.toLowerCase()
-          const typesLower = restaurant.types.join(' ').toLowerCase()
-          const searchTerm = foodType.toLowerCase()
-          return nameLower.includes(searchTerm) || typesLower.includes(searchTerm)
-        })
-      }
-
-      setFilteredRestaurants(filtered)
-
-      if (filtered.length === 0) {
-        setError('没有找到符合条件的餐厅，请尝试选择其他类型')
-        setStep('type')
-        setTypeDialogOpen(true)
-      } else {
-        // 随机选择一个餐厅
-        const randomIndex = Math.floor(Math.random() * filtered.length)
-        setSelectedRestaurant(filtered[randomIndex])
-        setStep('result')
+      if (data.places.length === 0) {
+        setError('No restaurants found matching your criteria. Try selecting a different category.')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '筛选餐厅时出错')
-      setStep('type')
-      setTypeDialogOpen(true)
+      setError(err instanceof Error ? err.message : 'Error filtering restaurants')
     } finally {
       setLoading(false)
     }
   }
 
-  // 重新开始
+  // Random restaurant selection
+  const handleRandomSelect = () => {
+    if (filteredRestaurants.length === 0) {
+      setError('No restaurants available to select from')
+      return
+    }
+    const randomIndex = Math.floor(Math.random() * filteredRestaurants.length)
+    setSelectedRestaurant(filteredRestaurants[randomIndex])
+    setStep('result')
+  }
+
+  // Restart
   const handleRestart = () => {
     setStep('distance')
-    setDistance('')
+    setDistance('2')
     setFoodType('all')
+    setSortBy('distance')
     setRestaurants([])
     setFilteredRestaurants([])
     setSelectedRestaurant(null)
@@ -206,35 +194,42 @@ export default function WhatToEatPage() {
     setDistanceDialogOpen(true)
   }
 
+  // Format distance
+  const formatDistance = (meters: number | undefined) => {
+    if (!meters) return 'N/A'
+    if (meters < 1000) return `${Math.round(meters)}m`
+    return `${(meters / 1000).toFixed(1)}km`
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <Sparkles className="text-orange-500" />
-            今天吃什么？
+            <Sparkles className="text-blue-500" />
+            What's Near Me?
           </h1>
           <p className="text-lg text-gray-600">
-            让我们帮你找到附近的美食吧！
+            Discover restaurants near you and let us help you decide what to eat today!
           </p>
         </div>
 
-        {/* 距离输入对话框 */}
+        {/* Distance Input Dialog */}
         <Dialog open={distanceDialogOpen} onOpenChange={setDistanceDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <MapPin className="text-orange-500" />
-                第一步：选择距离
+                <MapPin className="text-blue-500" />
+                Step 1: Set Search Distance
               </DialogTitle>
               <DialogDescription>
-                请输入您希望搜索的距离范围（单位：公里）
+                Enter the distance range you want to search (in kilometers)
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <Input
                 type="number"
-                placeholder="例如：2"
+                placeholder="e.g., 2"
                 value={distance}
                 onChange={(e) => setDistance(e.target.value)}
                 onKeyDown={(e) => {
@@ -253,51 +248,13 @@ export default function WhatToEatPage() {
                 disabled={loading || !distance}
                 className="w-full"
               >
-                {loading ? '搜索中...' : '确认'}
+                {loading ? 'Searching...' : 'Search Restaurants'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* 食物类型选择对话框 */}
-        <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Utensils className="text-orange-500" />
-                第二步：选择食物类型
-              </DialogTitle>
-              <DialogDescription>
-                请选择您想吃的食物类型
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <Select value={foodType} onValueChange={setFoodType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择食物类型" />
-                </SelectTrigger>
-                <SelectContent>
-                  {foodTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <DialogFooter>
-              <Button
-                onClick={handleTypeSelect}
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? '筛选中...' : '确认'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* 错误提示 */}
+        {/* Error Message */}
         {error && (
           <Card className="mb-6 border-red-200 bg-red-50">
             <CardContent className="pt-6">
@@ -306,13 +263,122 @@ export default function WhatToEatPage() {
           </Card>
         )}
 
-        {/* 结果显示 */}
+        {/* Browse Results */}
+        {step === 'browse' && (
+          <div className="space-y-6">
+            {/* Filters and Sort */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Filter & Sort</CardTitle>
+                <CardDescription>
+                  Found {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Category</label>
+                    <Select value={foodType} onValueChange={(value) => {
+                      setFoodType(value)
+                      setTimeout(handleFilterChange, 100)
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {foodTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Sort By</label>
+                    <Select value={sortBy} onValueChange={(value) => {
+                      setSortBy(value)
+                      setTimeout(handleFilterChange, 100)
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="distance">Distance (Nearest First)</SelectItem>
+                        <SelectItem value="rating">Rating (Highest First)</SelectItem>
+                        <SelectItem value="name">Name (A-Z)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    onClick={handleRandomSelect}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600"
+                    size="lg"
+                  >
+                    <Shuffle className="mr-2 h-4 w-4" />
+                    Pick Random Restaurant
+                  </Button>
+                  <Button
+                    onClick={handleRestart}
+                    variant="outline"
+                    size="lg"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    New Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Restaurant List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRestaurants.map((restaurant) => (
+                <Card
+                  key={restaurant.id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => {
+                    setSelectedRestaurant(restaurant)
+                    setStep('result')
+                  }}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg">{restaurant.name}</CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <MapPin className="h-3 w-3" />
+                      {formatDistance(restaurant.distance)} away
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {restaurant.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star className="text-yellow-500 fill-yellow-500 h-4 w-4" />
+                          <span className="text-sm font-medium">{restaurant.rating}</span>
+                        </div>
+                      )}
+                      {restaurant.cuisine && (
+                        <Badge variant="secondary" className="text-xs">
+                          {restaurant.cuisine}
+                        </Badge>
+                      )}
+                      <p className="text-sm text-gray-600 line-clamp-2">{restaurant.vicinity}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Result Display */}
         {step === 'result' && selectedRestaurant && (
-          <Card className="border-2 border-orange-200 shadow-lg">
+          <Card className="border-2 border-blue-200 shadow-lg">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl mb-2">🎉 推荐餐厅</CardTitle>
+              <CardTitle className="text-3xl mb-2">🎉 Your Random Pick!</CardTitle>
               <CardDescription className="text-lg">
-                为您找到了 {filteredRestaurants.length} 家符合条件的餐厅
+                Found {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} matching your criteria
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -320,68 +386,85 @@ export default function WhatToEatPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   {selectedRestaurant.name}
                 </h2>
-                <div className="flex items-center justify-center gap-4 text-gray-600 mb-4">
+                <div className="flex items-center justify-center gap-4 text-gray-600 mb-4 flex-wrap">
                   {selectedRestaurant.rating && (
                     <div className="flex items-center gap-1">
                       <Star className="text-yellow-500 fill-yellow-500" size={18} />
                       <span className="font-semibold">{selectedRestaurant.rating}</span>
                     </div>
                   )}
-                  {selectedRestaurant.userRatingsTotal && (
-                    <div className="flex items-center gap-1">
-                      <Users size={18} />
-                      <span>{selectedRestaurant.userRatingsTotal} 评价</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1">
+                    <MapPin size={18} className="text-blue-500" />
+                    <span>{formatDistance(selectedRestaurant.distance)} away</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-gray-700 mb-4">
-                  <MapPin size={18} className="text-orange-500" />
+                  <MapPin size={18} className="text-blue-500" />
                   <span>{selectedRestaurant.vicinity}</span>
                 </div>
-                {selectedRestaurant.priceLevel && (
-                  <div className="text-gray-600">
-                    价格等级: {'$'.repeat(selectedRestaurant.priceLevel)}
+                {selectedRestaurant.cuisine && (
+                  <Badge variant="secondary" className="mb-2">
+                    {selectedRestaurant.cuisine}
+                  </Badge>
+                )}
+                {selectedRestaurant.phone && (
+                  <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
+                    <Phone size={16} />
+                    <span className="text-sm">{selectedRestaurant.phone}</span>
+                  </div>
+                )}
+                {selectedRestaurant.website && (
+                  <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
+                    <Globe size={16} />
+                    <a
+                      href={selectedRestaurant.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Visit Website
+                    </a>
                   </div>
                 )}
               </div>
-              <div className="flex gap-3 justify-center pt-4">
-                <Button onClick={handleRestart} variant="outline" size="lg">
-                  重新选择
+              <div className="flex gap-3 justify-center pt-4 flex-wrap">
+                <Button onClick={() => setStep('browse')} variant="outline" size="lg">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to List
                 </Button>
                 <Button
-                  onClick={() => {
-                    const randomIndex = Math.floor(Math.random() * filteredRestaurants.length)
-                    setSelectedRestaurant(filteredRestaurants[randomIndex])
-                  }}
+                  onClick={handleRandomSelect}
                   size="lg"
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-blue-500 hover:bg-blue-600"
                 >
-                  换一个
+                  <Shuffle className="mr-2 h-4 w-4" />
+                  Pick Another
                 </Button>
                 <Button
                   onClick={() => {
                     window.open(
-                      `https://www.google.com/maps/search/?api=1&query=${selectedRestaurant.geometry.location.lat},${selectedRestaurant.geometry.location.lng}&query_place_id=${selectedRestaurant.id}`,
+                      `https://www.openstreetmap.org/?mlat=${selectedRestaurant.geometry.location.lat}&mlon=${selectedRestaurant.geometry.location.lng}&zoom=15`,
                       '_blank'
                     )
                   }}
                   size="lg"
                   variant="default"
                 >
-                  查看地图
+                  <Navigation className="mr-2 h-4 w-4" />
+                  View on Map
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* 加载状态 */}
+        {/* Loading State */}
         {loading && (
           <Card className="mt-6">
             <CardContent className="pt-6 text-center">
               <div className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-                <span>正在搜索餐厅...</span>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span>Searching for restaurants...</span>
               </div>
             </CardContent>
           </Card>
@@ -390,4 +473,3 @@ export default function WhatToEatPage() {
     </div>
   )
 }
-

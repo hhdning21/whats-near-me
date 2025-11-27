@@ -7,9 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: "What's Near Me - UBC Student App",
+  description: 'Discover restaurants, study spots, and resources near you. Built for UBC students to enhance campus life and wellbeing.',
 }
 
 export default function RootLayout({
