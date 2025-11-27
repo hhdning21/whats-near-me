@@ -221,10 +221,12 @@ export default function UBCWellbeingPage() {
     <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <GraduationCap className="text-green-600" />
-            UBC Student Wellbeing
-          </h1>
+          <Link href="/" className="inline-block">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3 hover:text-green-600 transition-colors cursor-pointer">
+              <GraduationCap className="text-green-600" />
+              UBC Student Wellbeing
+            </h1>
+          </Link>
           <p className="text-lg text-gray-600">
             Resources and tools to support your academic success and personal wellbeing
           </p>
