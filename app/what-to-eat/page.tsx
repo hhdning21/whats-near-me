@@ -54,6 +54,7 @@ export default function WhatToEatPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [distanceDialogOpen, setDistanceDialogOpen] = useState(true)
+  const [typeDialogOpen, setTypeDialogOpen] = useState(false)
 
   // Get user location
   useEffect(() => {
@@ -92,8 +93,8 @@ export default function WhatToEatPage() {
     { value: 'vegetarian', label: 'Vegetarian' },
   ]
 
-  // Handle distance input and search
-  const handleDistanceSubmit = async () => {
+  // Handle distance input - close distance dialog and open type dialog
+  const handleDistanceSubmit = () => {
     if (!distance || isNaN(Number(distance)) || Number(distance) <= 0) {
       setError('Please enter a valid distance (in kilometers)')
       return
@@ -104,9 +105,22 @@ export default function WhatToEatPage() {
       return
     }
 
-    setLoading(true)
     setError(null)
     setDistanceDialogOpen(false)
+    // Open the type selection dialog
+    setTypeDialogOpen(true)
+  }
+
+  // Handle food type selection and search restaurants
+  const handleTypeSelect = async () => {
+    if (!userLocation || !distance) {
+      setError('Missing required information')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setTypeDialogOpen(false)
 
     try {
       const radiusInMeters = Number(distance) * 1000
@@ -124,7 +138,7 @@ export default function WhatToEatPage() {
       setFilteredRestaurants(data.places || [])
 
       if (data.places.length === 0) {
-        setError('No restaurants found within the specified distance. Try increasing the distance.')
+        setError('No restaurants found matching your criteria. Try selecting a different type or increasing the distance.')
         setStep('distance')
         setDistanceDialogOpen(true)
       } else {
@@ -192,6 +206,7 @@ export default function WhatToEatPage() {
     setSelectedRestaurant(null)
     setError(null)
     setDistanceDialogOpen(true)
+    setTypeDialogOpen(false)
   }
 
   // Format distance
@@ -245,8 +260,56 @@ export default function WhatToEatPage() {
             <DialogFooter>
               <Button
                 onClick={handleDistanceSubmit}
-                disabled={loading || !distance}
+                disabled={!distance}
                 className="w-full"
+              >
+                Next: Choose Restaurant Type
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Food Type Selection Dialog */}
+        <Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Utensils className="text-blue-500" />
+                Step 2: Choose Restaurant Type
+              </DialogTitle>
+              <DialogDescription>
+                Select the type of cuisine you want to eat
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Select value={foodType} onValueChange={setFoodType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select restaurant type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {foodTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter className="!flex-row !justify-stretch gap-2">
+              <Button
+                onClick={() => {
+                  setTypeDialogOpen(false)
+                  setDistanceDialogOpen(true)
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleTypeSelect}
+                disabled={loading}
+                className="flex-1"
               >
                 {loading ? 'Searching...' : 'Search Restaurants'}
               </Button>
