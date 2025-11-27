@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Utensils, Star, Users, Sparkles, Shuffle, ArrowLeft, Navigation, Phone, Globe } from 'lucide-react'
+import { MapPin, Utensils, Star, Users, Sparkles, Shuffle, ArrowLeft, Navigation, Phone, Globe, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Place {
@@ -383,21 +383,42 @@ export default function WhatToEatPage() {
             {/* Filters and Sort */}
             <Card>
               <CardHeader>
-                <CardTitle>Filter & Sort</CardTitle>
-                <CardDescription>
-                  Found {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''}
+                <CardTitle className="flex items-center gap-2">
+                  Filter & Sort
+                  {loading && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  )}
+                </CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Loading restaurants...</span>
+                    </>
+                  ) : (
+                    <>
+                      Found {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''}
+                    </>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Category</label>
-                    <Select value={foodType} onValueChange={(value) => {
-                      setFoodType(value)
-                      handleCategoryChange(value)
-                    }}>
-                      <SelectTrigger>
+                    <Select 
+                      value={foodType} 
+                      onValueChange={(value) => {
+                        setFoodType(value)
+                        handleCategoryChange(value)
+                      }}
+                      disabled={loading}
+                    >
+                      <SelectTrigger className={loading ? 'opacity-50 cursor-not-allowed' : ''}>
                         <SelectValue placeholder="Select category" />
+                        {loading && (
+                          <Loader2 className="h-4 w-4 animate-spin absolute right-8" />
+                        )}
                       </SelectTrigger>
                       <SelectContent>
                         {foodTypes.map((type) => (
@@ -413,12 +434,19 @@ export default function WhatToEatPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">Sort By</label>
-                    <Select value={sortBy} onValueChange={(value) => {
-                      setSortBy(value)
-                      handleSortChange(value)
-                    }}>
-                      <SelectTrigger>
+                    <Select 
+                      value={sortBy} 
+                      onValueChange={(value) => {
+                        setSortBy(value)
+                        handleSortChange(value)
+                      }}
+                      disabled={loading}
+                    >
+                      <SelectTrigger className={loading ? 'opacity-50 cursor-not-allowed' : ''}>
                         <SelectValue placeholder="Sort by" />
+                        {loading && (
+                          <Loader2 className="h-4 w-4 animate-spin absolute right-8" />
+                        )}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="distance">Distance (Nearest First)</SelectItem>
@@ -433,6 +461,7 @@ export default function WhatToEatPage() {
                     onClick={handleRandomSelect}
                     className="flex-1 bg-blue-500 hover:bg-blue-600"
                     size="lg"
+                    disabled={loading || filteredRestaurants.length === 0}
                   >
                     <Shuffle className="mr-2 h-4 w-4" />
                     Pick Random Restaurant
@@ -441,6 +470,7 @@ export default function WhatToEatPage() {
                     onClick={handleRestart}
                     variant="outline"
                     size="lg"
+                    disabled={loading}
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     New Search
@@ -450,42 +480,54 @@ export default function WhatToEatPage() {
             </Card>
 
             {/* Restaurant List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredRestaurants.map((restaurant) => (
-                <Card
-                  key={restaurant.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => {
-                    setSelectedRestaurant(restaurant)
-                    setStep('result')
-                  }}
-                >
-                  <CardHeader>
-                    <CardTitle className="text-lg">{restaurant.name}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <MapPin className="h-3 w-3" />
-                      {formatDistance(restaurant.distance)} away
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {restaurant.rating && (
-                        <div className="flex items-center gap-1">
-                          <Star className="text-yellow-500 fill-yellow-500 h-4 w-4" />
-                          <span className="text-sm font-medium">{restaurant.rating}</span>
-                        </div>
-                      )}
-                      {restaurant.cuisine && (
-                        <Badge variant="secondary" className="text-xs flex items-center gap-1.5 w-fit">
-                          <span>{getCuisineIcon(restaurant.cuisine)}</span>
-                          <span>{restaurant.cuisine}</span>
-                        </Badge>
-                      )}
-                      <p className="text-sm text-gray-600 line-clamp-2">{restaurant.vicinity}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="relative">
+              {loading && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                    <span className="text-sm text-gray-600">Loading restaurants...</span>
+                  </div>
+                </div>
+              )}
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${loading ? 'opacity-50' : ''}`}>
+                {filteredRestaurants.map((restaurant) => (
+                  <Card
+                    key={restaurant.id}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => {
+                      if (!loading) {
+                        setSelectedRestaurant(restaurant)
+                        setStep('result')
+                      }
+                    }}
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg">{restaurant.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3" />
+                        {formatDistance(restaurant.distance)} away
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {restaurant.rating && (
+                          <div className="flex items-center gap-1">
+                            <Star className="text-yellow-500 fill-yellow-500 h-4 w-4" />
+                            <span className="text-sm font-medium">{restaurant.rating}</span>
+                          </div>
+                        )}
+                        {restaurant.cuisine && (
+                          <Badge variant="secondary" className="text-xs flex items-center gap-1.5 w-fit">
+                            <span>{getCuisineIcon(restaurant.cuisine)}</span>
+                            <span>{restaurant.cuisine}</span>
+                          </Badge>
+                        )}
+                        <p className="text-sm text-gray-600 line-clamp-2">{restaurant.vicinity}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         )}
