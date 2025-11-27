@@ -94,6 +94,19 @@ export default function WhatToEatPage() {
     { value: 'vegetarian', label: 'Vegetarian' },
   ]
 
+  // Client-side sorting for immediate feedback
+  const sortRestaurants = (restaurants: Place[], sortBy: string): Place[] => {
+    const sorted = [...restaurants]
+    if (sortBy === 'distance') {
+      sorted.sort((a, b) => (a.distance || 0) - (b.distance || 0))
+    } else if (sortBy === 'rating') {
+      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    } else if (sortBy === 'name') {
+      sorted.sort((a, b) => a.name.localeCompare(b.name))
+    }
+    return sorted
+  }
+
   // Handle distance input - close distance dialog and open type dialog
   const handleDistanceSubmit = () => {
     if (!distance || isNaN(Number(distance)) || Number(distance) <= 0) {
@@ -135,8 +148,9 @@ export default function WhatToEatPage() {
       }
 
       const data = await response.json()
+      const sortedPlaces = sortRestaurants(data.places || [], sortBy)
       setRestaurants(data.places || [])
-      setFilteredRestaurants(data.places || [])
+      setFilteredRestaurants(sortedPlaces)
 
       if (data.places.length === 0) {
         setError('No restaurants found matching your criteria. Try selecting a different type or increasing the distance.')
@@ -154,8 +168,8 @@ export default function WhatToEatPage() {
     }
   }
 
-  // Handle filter and sort changes
-  const handleFilterChange = async () => {
+  // Handle category filter changes - fetch new data from API
+  const handleCategoryChange = async (newCategory: string) => {
     if (!userLocation || !distance) return
 
     setLoading(true)
@@ -164,7 +178,7 @@ export default function WhatToEatPage() {
     try {
       const radiusInMeters = Number(distance) * 1000
       const response = await fetch(
-        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=${foodType}&sortBy=${sortBy}`
+        `/api/places?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusInMeters}&type=${newCategory}&sortBy=${sortBy}`
       )
 
       if (!response.ok) {
@@ -173,7 +187,9 @@ export default function WhatToEatPage() {
       }
 
       const data = await response.json()
-      setFilteredRestaurants(data.places || [])
+      const sortedPlaces = sortRestaurants(data.places || [], sortBy)
+      setRestaurants(data.places || [])
+      setFilteredRestaurants(sortedPlaces)
 
       if (data.places.length === 0) {
         setError('No restaurants found matching your criteria. Try selecting a different category.')
@@ -182,6 +198,14 @@ export default function WhatToEatPage() {
       setError(err instanceof Error ? err.message : 'Error filtering restaurants')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Handle sort changes - sort existing restaurants immediately
+  const handleSortChange = (newSortBy: string) => {
+    if (filteredRestaurants.length > 0) {
+      const sorted = sortRestaurants(filteredRestaurants, newSortBy)
+      setFilteredRestaurants(sorted)
     }
   }
 
@@ -346,7 +370,7 @@ export default function WhatToEatPage() {
                     <label className="text-sm font-medium mb-2 block">Category</label>
                     <Select value={foodType} onValueChange={(value) => {
                       setFoodType(value)
-                      setTimeout(handleFilterChange, 100)
+                      handleCategoryChange(value)
                     }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
@@ -364,7 +388,7 @@ export default function WhatToEatPage() {
                     <label className="text-sm font-medium mb-2 block">Sort By</label>
                     <Select value={sortBy} onValueChange={(value) => {
                       setSortBy(value)
-                      setTimeout(handleFilterChange, 100)
+                      handleSortChange(value)
                     }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Sort by" />

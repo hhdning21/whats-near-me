@@ -135,7 +135,7 @@ function FeatureCard({
   )
 }
 
-function FeatureStep({ 
+function FeatureStep({
   number, 
   title, 
   description 
