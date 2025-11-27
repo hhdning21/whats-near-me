@@ -77,21 +77,45 @@ export default function WhatToEatPage() {
     }
   }, [])
 
-  // Food type options
+  // Get cuisine icon
+  const getCuisineIcon = (cuisine: string | null | undefined): string => {
+    if (!cuisine) return '🍽️'
+    const cuisineLower = cuisine.toLowerCase()
+    const iconMap: Record<string, string> = {
+      'chinese': '🥢',
+      'japanese': '🍣',
+      'korean': '🍜',
+      'italian': '🍝',
+      'mexican': '🌮',
+      'thai': '🍛',
+      'indian': '🍛',
+      'american': '🍔',
+      'fast_food': '🍟',
+      'fast food': '🍟',
+      'cafe': '☕',
+      'dessert': '🍰',
+      'vegetarian': '🥗',
+      'western': '🍖',
+      'other': '🍽️',
+    }
+    return iconMap[cuisineLower] || '🍽️'
+  }
+
+  // Food type options with icons
   const foodTypes = [
-    { value: 'all', label: 'All Types' },
-    { value: 'chinese', label: 'Chinese' },
-    { value: 'japanese', label: 'Japanese' },
-    { value: 'korean', label: 'Korean' },
-    { value: 'italian', label: 'Italian' },
-    { value: 'mexican', label: 'Mexican' },
-    { value: 'thai', label: 'Thai' },
-    { value: 'indian', label: 'Indian' },
-    { value: 'american', label: 'American' },
-    { value: 'fast_food', label: 'Fast Food' },
-    { value: 'cafe', label: 'Cafe' },
-    { value: 'dessert', label: 'Dessert' },
-    { value: 'vegetarian', label: 'Vegetarian' },
+    { value: 'all', label: 'All Types', icon: '🍽️' },
+    { value: 'chinese', label: 'Chinese', icon: '🥢' },
+    { value: 'japanese', label: 'Japanese', icon: '🍣' },
+    { value: 'korean', label: 'Korean', icon: '🍜' },
+    { value: 'italian', label: 'Italian', icon: '🍝' },
+    { value: 'mexican', label: 'Mexican', icon: '🌮' },
+    { value: 'thai', label: 'Thai', icon: '🍛' },
+    { value: 'indian', label: 'Indian', icon: '🍛' },
+    { value: 'american', label: 'American', icon: '🍔' },
+    { value: 'fast_food', label: 'Fast Food', icon: '🍟' },
+    { value: 'cafe', label: 'Cafe', icon: '☕' },
+    { value: 'dessert', label: 'Dessert', icon: '🍰' },
+    { value: 'vegetarian', label: 'Vegetarian', icon: '🥗' },
   ]
 
   // Client-side sorting for immediate feedback
@@ -378,7 +402,10 @@ export default function WhatToEatPage() {
                       <SelectContent>
                         {foodTypes.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
-                            {type.label}
+                            <span className="flex items-center gap-2">
+                              <span>{type.icon}</span>
+                              <span>{type.label}</span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -449,8 +476,9 @@ export default function WhatToEatPage() {
                         </div>
                       )}
                       {restaurant.cuisine && (
-                        <Badge variant="secondary" className="text-xs">
-                          {restaurant.cuisine}
+                        <Badge variant="secondary" className="text-xs flex items-center gap-1.5 w-fit">
+                          <span>{getCuisineIcon(restaurant.cuisine)}</span>
+                          <span>{restaurant.cuisine}</span>
                         </Badge>
                       )}
                       <p className="text-sm text-gray-600 line-clamp-2">{restaurant.vicinity}</p>
@@ -493,8 +521,9 @@ export default function WhatToEatPage() {
                   <span>{selectedRestaurant.vicinity}</span>
                 </div>
                 {selectedRestaurant.cuisine && (
-                  <Badge variant="secondary" className="mb-2">
-                    {selectedRestaurant.cuisine}
+                  <Badge variant="secondary" className="mb-2 flex items-center gap-1.5 w-fit mx-auto">
+                    <span className="text-base">{getCuisineIcon(selectedRestaurant.cuisine)}</span>
+                    <span>{selectedRestaurant.cuisine}</span>
                   </Badge>
                 )}
                 {selectedRestaurant.phone && (
