@@ -1,4 +1,4 @@
-# What's Near Me - UBC Student App
+# What's Near Me
 
 A location-based app built for UBC students to discover restaurants, study spots, and campus resources. Built with Next.js, OpenStreetMap, and Tailwind CSS.
 
@@ -18,6 +18,8 @@ A location-based app built for UBC students to discover restaurants, study spots
 - **Quick Navigation**: Get directions to study spots and events
 
 ## 🚀 Quick Start
+
+We have a deployment! Visit https://whats-near-me.vercel.app/ 
 
 ### Prerequisites
 
